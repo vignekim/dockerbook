@@ -1,0 +1,99 @@
+﻿yum -y install docker docker-registry
+systemctl enable docker
+systemctl start docker
+systemctl status docker
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+> docker-compose.yml
+docker-compose --version
+docker-compose up -d
+docker-compose ps -a
+docker-compose stop
+docker-compose rm
+
+docker pull centos:7
+docker run --privileged -d --name namenode centos:7 init
+docker exec -it namenode bash
+
+yum -y install iptables wget initscripts openssh-server openssh-clients openssh-askpass vim
+yum -y install java-1.8.0-openjdk-devel.x86_64 
+which javac
+readlink -f /usr/bin/javac
+
+vi /etc/hosts
+cd ~
+ssh-keygen -t rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 644 ~/.ssh/authorized_keys
+ssh localhost
+
+wget hadoop.tar.gz
+tar zxvf hadoop.tar.gz
+
+mkdir ~/hadoop/name
+mkdir ~/hadoop/data
+mkdir ~/hadoop/temp
+
+hadoop-env.sh
+> 25   | export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.242.b08-0.el7_7.x86_64
+> 113 | export HADOOP_PID_DIR=/root/hadoop/pids
+
+hdfs-site.xml
+<configuration>
+<property>
+  <name>dfs.replication</name>
+  <value>1</value>
+</property>
+<property>
+  <name>dfs.namenode.name.dir</name>
+  <value>/root/hadoop/name</value>
+</property>
+<property>
+  <name>dfs.datanode.data.dir</name>
+  <value>/root/hadoop/data</value>
+</property>
+</configuration>
+
+core-site.xml
+<configuration>
+<property>
+  <name>fs.defaultFS</name>
+  <value>hdfs://localhost:9000</value>
+</property>
+<property>
+  <name>hadoop.tmp.dir</name>
+  <value>/root/hadoop/temp</value>
+</property>
+</configuration>
+
+vi ~/.bash_profile
+export JAVA_HOME=
+export HADOOP_HOME=
+export PATH=$PATH:$JAVA_HOME/bin:$HADOOP/bin:$HADOOP/sbin
+
+#export HDFS_NAMENODE_USER=<user>
+#export HDFS_DATANODE_USER=<user>
+#export HDFS_SECONDARYNAMENODE_USER=<user>
+#export YARN_RESOURCEMANAGER_USER=<user>
+#export YARN_NODEMANAGER_USER=<user>
+
+source ~/.bash_profile
+env
+echo $JAVA_HOME
+echo $HADOOP_HOME
+
+hadoop namenode -format
+start-all.sh
+jps
+hdfs dfs -mkdir /data
+hdfs dfs -ls /
+
+>> ctrl + p >> ctrl + q
+docker commit namenode namenode
+
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker rmi $(docker ps -a -q)
+
+
